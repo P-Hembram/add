@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Random Addition (1–10, 5 times)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      padding: 16px;
+      background: #a2afc4;
+      color: #0f172a;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* min-height: 100vh; */
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 20px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+      width: 100%;
+      max-width: 480px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .numbers {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+      min-height: 44px;
+    }
+
+    .pill {
+      background: #eef2ff;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 16px;
+      color: #1e3a8a;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      width: 100%;
+      transition: background 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #generateBtn {
+      background: #2563eb;
+      color: white;
+    }
+
+    #generateBtn:active {
+      background: #1d4ed8;
+    }
+
+    #generateBtn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    #showResultBtn {
+      background: #16a34a;
+      color: white;
+      display: none;
+    }
+
+    #showResultBtn:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    #resetBtn {
+      background: #e2e8f0;
+      color: #0f172a;
+      width: auto;
+      padding: 14px 20px;
+    }
+
+    #result {
+      margin-top: 16px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    @media only screen and (min-width: 768px) {
+      
+        
+      
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card" role="main">
+    <h1>Random Addition (1–10, 5 times)</h1>
+    <p class="hint">Tap <strong>"Generate Number"</strong> (or press Enter on desktop) 5 times to get random numbers
+      between 1 and 10.</p>
+
+    <div class="numbers" id="numbersContainer" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="actions">
+      <button id="generateBtn" type="button">Generate Number</button>
+      <div class="btn-row">
+        <button id="showResultBtn" type="button">Show Result</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div id="result" aria-live="polite"></div>
+  </div>
+
+  <script>
+    (function () {
+      const MAX_COUNT = 5;
+      const MIN = 1, MAX = 10;
+      let generated = [];
+
+      const numbersContainer = document.getElementById('numbersContainer');
+      const generateBtn = document.getElementById('generateBtn');
+      const showResultBtn = document.getElementById('showResultBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const resultDiv = document.getElementById('result');
+
+      function randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function addNumber(n) {
+        const span = document.createElement('span');
+        span.className = 'pill';
+        span.textContent = n;
+        numbersContainer.appendChild(span);
+      }
+
+      function handleGeneration() {
+        if (generated.length >= MAX_COUNT) return;
+
+        const n = randInt(MIN, MAX);
+        generated.push(n);
+        addNumber(n);
+
+        if (generated.length === MAX_COUNT) {
+          generateBtn.disabled = true;
+          showResultBtn.style.display = 'block';
+          showResultBtn.focus();
+        }
+      }
+
+      // Tap/Click event for the generate button
+      generateBtn.addEventListener('click', handleGeneration);
+
+      // Keep keyboard Enter support for desktop users
+      document.addEventListener('keydown', function (e) {
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (generated.length < MAX_COUNT) {
+            handleGeneration();
+          } else if (showResultBtn.style.display === 'block' && !showResultBtn.disabled) {
+            showResultBtn.click();
+          }
+        }
+      });
+
+      showResultBtn.addEventListener('click', function () {
+        const sum = generated.reduce((a, b) => a + b, 0);
+        resultDiv.textContent = `Result (sum of ${generated.length} numbers): ${sum}`;
+        showResultBtn.disabled = true;
+      });
+
+      resetBtn.addEventListener('click', function () {
+        generated = [];
+        numbersContainer.innerHTML = '';
+        resultDiv.textContent = '';
+        generateBtn.disabled = false;
+        showResultBtn.style.display = 'none';
+        showResultBtn.disabled = false;
+        generateBtn.focus();
+      });
+
+    })();
+  </script>
+</body>
+
+</html>
